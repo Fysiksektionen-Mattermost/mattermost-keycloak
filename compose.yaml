@@ -1,0 +1,63 @@
+services:
+  keycloak-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+    env_file:
+      - ./keycloak-secrets.env
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - keycloak-postgres-data:/var/lib/postgresql/data
+    networks:
+      - keycloak
+
+  keycloak:
+    build:
+      context: .
+      dockerfile: Containerfile
+    command: ["start", "--optimized", "--import-realm"]
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_HOSTNAME: mattermost.fysiksektionen.se:8080
+      KC_HOSTNAME_ADMIN: http://localhost:9001
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HTTP_MANAGEMENT_PORT: "9000"
+    env_file:
+      - ./keycloak-secrets.env
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080" # change to "8080:8080" for production
+      - "9000:9000"
+    networks:
+      - keycloak
+    volumes:
+      - ${KEYCLOAK_REALM_BK_FOLDER}/mattermost-keycloak-realm-0.json:/opt/keycloak/data/import/realm.json:ro
+
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      - keycloak
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+volumes:
+  keycloak-postgres-data:
+
+networks:
+  keycloak:
+    driver: bridge
