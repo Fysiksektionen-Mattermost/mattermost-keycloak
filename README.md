@@ -85,8 +85,10 @@ changing or removing them does not delete an already-created account.
 - **Reduced exposure:** PostgreSQL is internal-only and no database port is
   published.
 - **Rootless-compatible hardening:** host networking is avoided; services drop
-  all Linux capabilities and disable privilege escalation. nginx has a
-  read-only filesystem with only required temporary filesystems writable.
+  all Linux capabilities and disable privilege escalation. nginx starts as
+  container root so its rootless host identity can read the host-managed
+  certificate ACL, then runs workers as UID 101. nginx has a read-only
+  filesystem with only required temporary filesystems writable.
 - **Resource containment:** Keycloak has process and memory limits.
 - **Reproducible supply chain:** PostgreSQL, nginx, and Keycloak images are
   pinned to immutable registry digests.
