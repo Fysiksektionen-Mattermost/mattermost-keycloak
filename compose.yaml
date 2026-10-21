@@ -1,3 +1,25 @@
+x-keycloak-common: &keycloak-common
+  build:
+    context: .
+    dockerfile: Containerfile
+  depends_on:
+    keycloak-db:
+      condition: service_healthy
+  environment:
+    KC_DB: postgres
+    KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+    KC_DB_USERNAME: keycloak
+    KC_HOSTNAME: https://localhost:9001 # change for production
+    KC_HOSTNAME_ADMIN: https://localhost:9001
+    KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+    KC_HTTP_ENABLED: "true"
+    KC_HTTP_MANAGEMENT_PORT: "9000"
+    KC_PROXY_HEADERS: xforwarded
+  env_file:
+    - ./keycloak-secrets.env
+  networks:
+    - keycloak
+
 services:
   keycloak-db:
     image: postgres:16-alpine@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
@@ -20,24 +42,8 @@ services:
       - keycloak
 
   keycloak:
-    build:
-      context: .
-      dockerfile: Containerfile
+    <<: *keycloak-common
     command: ["start", "--optimized"]
-    depends_on:
-      keycloak-db:
-        condition: service_healthy
-    environment:
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
-      KC_DB_USERNAME: keycloak
-      KC_HOSTNAME: mattermost.fysiksektionen.se:8080
-      KC_HOSTNAME_ADMIN: https://localhost:9001
-      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
-      KC_HTTP_MANAGEMENT_PORT: "9000"
-      KC_PROXY_HEADERS: xforwarded
-    env_file:
-      - ./keycloak-secrets.env
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -48,31 +54,12 @@ services:
     ports:
       - "127.0.0.1:8080:8080" # change to "8080:8080" for production
       - "127.0.0.1:9000:9000"
-    networks:
-      - keycloak
 
   keycloak-import:
+    <<: *keycloak-common
     profiles:
       - import
-    build:
-      context: .
-      dockerfile: Containerfile
     command: ["import", "--optimized", "--file=/opt/keycloak/data/import/realm.json"]
-    depends_on:
-      keycloak-db:
-        condition: service_healthy
-    environment:
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
-      KC_DB_USERNAME: keycloak
-      KC_HOSTNAME: mattermost.fysiksektionen.se:8080
-      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
-      KC_HTTP_MANAGEMENT_PORT: "9000"
-      KC_PROXY_HEADERS: xforwarded
-    env_file:
-      - ./keycloak-secrets.env
-    networks:
-      - keycloak
     volumes:
       - ${KEYCLOAK_REALM_BK_FOLDER}/mattermost-keycloak-realm-0.json:/opt/keycloak/data/import/realm.json:ro
 
@@ -85,10 +72,11 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    user: "101:101"
     read_only: true
     tmpfs:
-      - /var/cache/nginx
-      - /var/run
+      - /var/cache/nginx:mode=1777
+      - /var/run:mode=1777
     ports:
       - "127.0.0.1:9001:9001"
     networks:

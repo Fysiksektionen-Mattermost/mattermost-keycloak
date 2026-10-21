@@ -20,8 +20,11 @@ admin proxy.
 | `9000` | Keycloak health and metrics management interface | Host loopback only |
 | `9001` | HTTPS admin proxy | Host loopback only; nginx also allows only `127.0.0.1` and `::1` |
 
-The admin URL is `https://localhost:9001`. The certificate mounted from
-`tls/` must include `localhost` in its subject alternative names.
+The local URL is `https://localhost:9001/admin/`; nginx redirects it to the
+Keycloak master console at `/admin/master/console/`. Keycloak and nginx use the
+same HTTPS localhost origin so the admin console's browser security checks work
+correctly. The certificate mounted from `tls/` must include `localhost` in its
+subject alternative names.
 
 ## Configuration and startup
 
@@ -84,13 +87,14 @@ Compose profile.
 ## Executive security decisions
 
 - **Local-only administrative access:** ports `9000` and `9001` are bound to
-  host loopback. nginx independently applies an allowlist and denies all other
-  client addresses.
+  host loopback. The nginx container is not directly published on any
+  non-loopback host address.
 - **Encrypted administrative traffic:** nginx requires TLS 1.2 or newer and
   sends HSTS. Certificates and private keys are mounted at runtime rather than
   embedded in an image.
 - **Trusted proxy handling:** Keycloak uses forwarded headers and nginx passes
-  the original host, protocol, client address, and forwarding chain.
+  the original host including its non-default port, protocol, client address,
+  and forwarding chain.
 - **Reduced exposure:** PostgreSQL is internal-only and no database port is
   published.
 - **Rootless-compatible hardening:** host networking is avoided; services drop
