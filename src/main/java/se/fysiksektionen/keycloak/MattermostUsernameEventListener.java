@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventType;
+import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -36,6 +37,10 @@ public final class MattermostUsernameEventListener implements EventListenerProvi
 
         String base = baseName(user.getFirstName(), user.getLastName());
         user.setSingleAttribute(ATTRIBUTE, availableName(realm, base));
+    }
+
+    @Override
+    public void onEvent(AdminEvent event, boolean includeRepresentation) {
     }
 
     private String availableName(RealmModel realm, String base) {
