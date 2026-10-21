@@ -71,7 +71,7 @@ services:
       - keycloak
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - /etc/letsencrypt/live/mattermost.fysiksektionen.se:/etc/nginx/tls:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
 
 volumes:
   keycloak-postgres-data:

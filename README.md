@@ -23,9 +23,11 @@ Rootless Docker deployment of Keycloak with PostgreSQL and an nginx proxy.
 The user endpoint is `http://mattermost.fysiksektionen.se:8080/`. nginx blocks
 the `/admin` and `/metrics` paths on that public listener. The local
 administrative URL is `https://localhost:9001/admin/`; nginx redirects it to
-the Keycloak master console at `/admin/master/console/`. The certificate
-mounted from `/etc/letsencrypt/live/mattermost.fysiksektionen.se` must include
-`localhost` in its subject alternative names.
+the Keycloak master console at `/admin/master/console/`. nginx mounts
+`/etc/letsencrypt` read-only so the live certificate symlinks and their archive
+targets are available. The certificate in
+`/etc/letsencrypt/live/mattermost.fysiksektionen.se` must include `localhost`
+in its subject alternative names.
 
 ## Configuration and startup
 
