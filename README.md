@@ -58,6 +58,35 @@ local certificate for `localhost`.
    docker compose logs --tail=100 keycloak nginx
    ```
 
+## Mattermost username provisioning
+
+The image includes a small Keycloak event listener that provisions the
+`mattermostUsername` user attribute when the user completes e-mail
+verification. It uses the first available value in this sequence:
+
+```text
+firstname.lastname
+firstname.lastname1
+firstname.lastname2
+```
+
+Names are lowercased, accents are removed, and characters outside
+Mattermost's username character set are removed. Values are limited to
+Mattermost's 22-character username limit. Existing `mattermostUsername`
+values are not changed.
+
+After starting the image, enable the listener for the relevant realm in the
+Keycloak administration console:
+
+1. Open **Realm settings** → **Events** → **Config**.
+2. Add `mattermost-username` to **Event listeners** and save.
+3. Leave **Events** → **Listeners** configured for user events; the listener
+   only acts on `VERIFY_EMAIL`.
+
+The listener is packaged against the Keycloak version declared in
+[`pom.xml`](./pom.xml). Update that dependency together with the Keycloak
+image when upgrading Keycloak.
+
 ## Temporary bootstrap administrator
 
 Keycloak reads `KC_BOOTSTRAP_ADMIN_USERNAME` and
