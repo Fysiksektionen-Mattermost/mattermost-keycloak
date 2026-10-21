@@ -2,12 +2,9 @@
 
 ## Deployment
 
-- [ ] Provision a CA-issued certificate whose SAN includes `localhost`, and
-      install it at
-      `/etc/letsencrypt/live/mattermost.fysiksektionen.se/fullchain.pem` and
-      `/etc/letsencrypt/live/mattermost.fysiksektionen.se/privkey.pem`.
-- [ ] Set restrictive ownership and permissions on the Let’s Encrypt private
-      key.
+- [ ] Trust the locally generated admin certificate on each administrative
+      client.
+- [ ] Set restrictive ownership and permissions on the local private key.
 - [ ] Replace all placeholder values in `keycloak-secrets.env` with generated,
       unique secrets.
 - [ ] Log in with the bootstrap administrator, create and verify a permanent
