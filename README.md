@@ -1,3 +1,5 @@
+Note: This repository was heavily written by AI, specifically GPT-5.6 Luna.
+
 # Mattermost Keycloak
 
 Rootless Docker deployment of Keycloak with PostgreSQL and an nginx proxy.
