@@ -9,7 +9,7 @@ x-keycloak-common: &keycloak-common
     KC_DB: postgres
     KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
     KC_DB_USERNAME: keycloak
-    KC_HOSTNAME: https://localhost:9001 # change for production
+    KC_HOSTNAME: http://mattermost.fysiksektionen.se:8080
     KC_HOSTNAME_ADMIN: https://localhost:9001
     KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
     KC_HTTP_ENABLED: "true"
@@ -52,7 +52,6 @@ services:
     pids_limit: 512
     mem_limit: 1g
     ports:
-      - "127.0.0.1:8080:8080" # change to "8080:8080" for production
       - "127.0.0.1:9000:9000"
 
   keycloak-import:
@@ -78,6 +77,7 @@ services:
       - /var/cache/nginx:mode=1777
       - /var/run:mode=1777
     ports:
+      - "8080:8080"
       - "127.0.0.1:9001:9001"
     networks:
       - keycloak

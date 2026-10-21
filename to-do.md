@@ -12,8 +12,6 @@
 - [ ] Log in with the bootstrap administrator, create and verify a permanent
       administrator, delete the temporary account, and remove the
       `KC_BOOTSTRAP_ADMIN_*` variables from `keycloak-secrets.env`.
-- [ ] Set the `mattermost-keycloak` realm's **Login theme** to
-      `mattermostLikeTheme` under **Realm settings → Themes**.
 - [ ] Confirm the host firewall does not forward or expose ports `9000` or
       `9001` beyond the local host.
 

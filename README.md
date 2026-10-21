@@ -1,30 +1,30 @@
 # Mattermost Keycloak
 
-Rootless Docker deployment of Keycloak with PostgreSQL and a local-only nginx
-admin proxy.
+Rootless Docker deployment of Keycloak with PostgreSQL and an nginx proxy.
 
 ## Architecture
 
 - **Keycloak** runs from the custom `Containerfile`.
 - **PostgreSQL** stores Keycloak state on the named
   `keycloak-postgres-data` volume. PostgreSQL has no published host port.
-- **nginx** runs on the Compose network and proxies to Keycloak over the
-  internal `keycloak` service name.
+- **nginx** runs on the Compose network and proxies public user traffic and
+  local administrative traffic to Keycloak over the internal `keycloak`
+  service name.
 - All services use the `keycloak` bridge network.
 
 ## Ports and access
 
 | Port | Purpose | Exposure |
 | --- | --- | --- |
-| `8080` | Keycloak application | Host loopback only |
+| `8080` | Keycloak user/application endpoint | Public |
 | `9000` | Keycloak health and metrics management interface | Host loopback only |
-| `9001` | HTTPS admin proxy | Host loopback only; nginx also allows only `127.0.0.1` and `::1` |
+| `9001` | HTTPS admin proxy | Host loopback only |
 
-The local URL is `https://localhost:9001/admin/`; nginx redirects it to the
-Keycloak master console at `/admin/master/console/`. Keycloak and nginx use the
-same HTTPS localhost origin so the admin console's browser security checks work
-correctly. The certificate mounted from `tls/` must include `localhost` in its
-subject alternative names.
+The user endpoint is `http://mattermost.fysiksektionen.se:8080/`. nginx blocks
+the `/admin` and `/metrics` paths on that public listener. The local
+administrative URL is `https://localhost:9001/admin/`; nginx redirects it to
+the Keycloak master console at `/admin/master/console/`. The certificate
+mounted from `tls/` must include `localhost` in its subject alternative names.
 
 ## Configuration and startup
 
@@ -86,9 +86,10 @@ Compose profile.
 
 ## Executive security decisions
 
-- **Local-only administrative access:** ports `9000` and `9001` are bound to
-  host loopback. The nginx container is not directly published on any
-  non-loopback host address.
+- **Separated endpoint exposure:** the user endpoint is published on port
+  `8080`, while ports `9000` and `9001` are bound to host loopback. nginx
+  blocks the administrative `/admin` and `/metrics` paths on the public
+  listener.
 - **Encrypted administrative traffic:** nginx requires TLS 1.2 or newer and
   sends HSTS. Certificates and private keys are mounted at runtime rather than
   embedded in an image.
