@@ -60,6 +60,8 @@ services:
       - ALL
     cap_add:
       - CHOWN
+      - SETGID
+      - SETUID
     user: "0:0"
     read_only: true
     tmpfs:
