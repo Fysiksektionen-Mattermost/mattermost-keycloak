@@ -3,10 +3,11 @@
 ## Deployment
 
 - [ ] Provision a CA-issued certificate whose SAN includes `localhost`, and
-      install it as `tls/fullchain.pem` and `tls/privkey.pem`.
-- [ ] Set restrictive ownership and permissions on `tls/privkey.pem`.
-- [ ] Set `KEYCLOAK_REALM_BK_FOLDER` in the deployment environment and verify
-      the imported realm file is present.
+      install it at
+      `/etc/letsencrypt/live/mattermost.fysiksektionen.se/fullchain.pem` and
+      `/etc/letsencrypt/live/mattermost.fysiksektionen.se/privkey.pem`.
+- [ ] Set restrictive ownership and permissions on the Let’s Encrypt private
+      key.
 - [ ] Replace all placeholder values in `keycloak-secrets.env` with generated,
       unique secrets.
 - [ ] Log in with the bootstrap administrator, create and verify a permanent

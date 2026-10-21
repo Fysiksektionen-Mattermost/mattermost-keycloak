@@ -17,14 +17,15 @@ Rootless Docker deployment of Keycloak with PostgreSQL and an nginx proxy.
 | Port | Purpose | Exposure |
 | --- | --- | --- |
 | `8080` | Keycloak user/application endpoint | Public |
-| `9000` | Keycloak health and metrics management interface | Host loopback only |
+| `9000` | nginx proxy to Keycloak health and metrics management interface | Host loopback only |
 | `9001` | HTTPS admin proxy | Host loopback only |
 
 The user endpoint is `http://mattermost.fysiksektionen.se:8080/`. nginx blocks
 the `/admin` and `/metrics` paths on that public listener. The local
 administrative URL is `https://localhost:9001/admin/`; nginx redirects it to
 the Keycloak master console at `/admin/master/console/`. The certificate
-mounted from `tls/` must include `localhost` in its subject alternative names.
+mounted from `/etc/letsencrypt/live/mattermost.fysiksektionen.se` must include
+`localhost` in its subject alternative names.
 
 ## Configuration and startup
 
@@ -33,9 +34,9 @@ mounted from `tls/` must include `localhost` in its subject alternative names.
    values. Set `KC_BOOTSTRAP_ADMIN_USERNAME` and
    `KC_BOOTSTRAP_ADMIN_PASSWORD` for the temporary initial administrator.
    Never commit the secrets file.
-2. Place the trusted certificate and private key at:
-   - `tls/fullchain.pem`
-   - `tls/privkey.pem`
+2. Ensure the Let’s Encrypt certificate directory exists and contains
+   `fullchain.pem` and `privkey.pem` at
+   `/etc/letsencrypt/live/mattermost.fysiksektionen.se`.
 3. Start the stack:
 
    ```sh
@@ -66,23 +67,6 @@ After logging in through `https://localhost:9001`:
 
 The bootstrap credentials do not reset an existing Keycloak database, and
 changing or removing them does not delete an already-created account.
-
-## Optional realm import
-
-Realm import is deliberately disabled during normal startup. This prevents a
-routine container restart from treating the bootstrap JSON as an import
-operation against the live database. The import profile uses Keycloak's
-one-shot `import` command and exits after the operation.
-
-To explicitly import the realm, set `KEYCLOAK_REALM_BK_FOLDER` to a directory
-containing `mattermost-keycloak-realm-0.json`, then run:
-
-```sh
-docker compose --profile import run --rm keycloak-import
-```
-
-The import service is a one-shot operation and is not started by the default
-Compose profile.
 
 ## Executive security decisions
 
@@ -124,7 +108,7 @@ Compose profile.
 The current configuration has been validated with:
 
 ```sh
-KEYCLOAK_REALM_BK_FOLDER=/tmp docker compose config
+docker compose config
 docker build --file Containerfile .
 docker run ... nginx:1.27-alpine nginx -t
 ```
