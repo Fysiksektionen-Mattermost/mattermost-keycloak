@@ -95,6 +95,11 @@ The listener is packaged against the Keycloak version declared in
 [`pom.xml`](./pom.xml). Update that dependency together with the Keycloak
 image when upgrading Keycloak.
 
+Keycloak runs this listener synchronously in the e-mail verification
+transaction. The `mattermostUsername` and `id` attributes are written and the
+transaction is committed before Keycloak redirects the user back to
+Mattermost.
+
 ## Temporary bootstrap administrator
 
 Keycloak reads `KC_BOOTSTRAP_ADMIN_USERNAME` and
