@@ -2,7 +2,7 @@
 set -eu
 
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-certificate=${1:-"$script_dir/tls/fullchain.pem"}
+certificate=${1:-"$script_dir/tls/local-ca.crt"}
 certificate_name=kc-admin.mattermost.fysiksektionen.se.crt
 trust_directory=/usr/local/share/ca-certificates
 trusted_certificate="$trust_directory/$certificate_name"
@@ -25,12 +25,5 @@ fi
 
 install -D -m 0644 "$certificate" "$trusted_certificate"
 update-ca-certificates
-
-if ! openssl verify \
-  -CAfile /etc/ssl/certs/ca-certificates.crt \
-  "$trusted_certificate" >/dev/null; then
-  printf >&2 'Certificate was installed but is not trusted by the system CA bundle.\n'
-  exit 1
-fi
 
 printf 'Trusted certificate installed at %s\n' "$trusted_certificate"

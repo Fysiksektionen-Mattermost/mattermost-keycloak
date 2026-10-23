@@ -1,1 +1,8 @@
 privkey.pem
+local-ca-key.pem
+local-ca.srl
+server.csr
+server-extensions.cnf
+fullchain.pem
+server.crt
+local-ca.crt
