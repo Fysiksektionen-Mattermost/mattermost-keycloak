@@ -20,6 +20,17 @@ the client machine, for example:
 127.0.0.1 kc-admin.mattermost.fysiksektionen.se
 ```
 
+> **NOTE:**
+> Make sure you use the remote local-ca.crt (it is also duplicated in bk_admin_crt)
+> and not a local one that you have generated yourself.
+> 
+> You can run:
+> ```bash
+> git update-index --skip-worktree ...
+> ```
+> to avoid accidentally pushing overwrites to the remote, but this
+> does not help against you installing the wrong local-ca on your system.
+
 ## Firefox
 
 1. Resolve kc-admin.mattermost.fysiksektionen.se as localhost according to the OS-specific instructions.
