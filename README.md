@@ -63,6 +63,13 @@ local certificate for `kc-admin.mattermost.fysiksektionen.se` and `localhost`.
    docker compose logs --tail=100 keycloak nginx
    ```
 
+> Note:
+> kc-admin_crt/tls/fullchain.pem is marked with
+> ```bash
+> git update-index --assume-unchanged ...
+> ```
+> so changes to it will not automatically be committed.
+
 ## Mattermost username provisioning
 
 The image includes a small Keycloak event listener that provisions the
