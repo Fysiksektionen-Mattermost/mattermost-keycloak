@@ -5,4 +5,4 @@ server.csr
 server-extensions.cnf
 fullchain.pem
 server.crt
-local-ca.crt
+fullchain.pem
