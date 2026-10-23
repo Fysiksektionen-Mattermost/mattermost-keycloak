@@ -4,10 +4,6 @@ Note: This repository was heavily written by AI, specifically GPT-5.6 Luna.
 
 Rootless Docker deployment of Keycloak with PostgreSQL and an nginx proxy.
 
-The provider build targets Java 25, the current Java LTS. The container build
-uses Maven 3.9.11 with Eclipse Temurin 25; the Keycloak runtime image supplies
-its own supported Java runtime.
-
 ## Architecture
 
 - **Keycloak** runs from the custom `Containerfile`.
