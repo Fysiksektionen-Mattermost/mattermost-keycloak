@@ -31,7 +31,7 @@ services:
       KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
       KC_DB_USERNAME: keycloak
       KC_HOSTNAME: https://mattermost.fysiksektionen.se:8080
-      KC_HOSTNAME_ADMIN: https://localhost:9001
+      KC_HOSTNAME_ADMIN: https://kc-admin.mattermost.fysiksektionen.se:9001
       KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
       KC_HTTP_ENABLED: "true"
       KC_HTTP_MANAGEMENT_PORT: "9000"
