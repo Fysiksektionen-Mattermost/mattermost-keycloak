@@ -26,4 +26,11 @@ fi
 install -D -m 0644 "$certificate" "$trusted_certificate"
 update-ca-certificates
 
+if ! openssl verify \
+  -CAfile /etc/ssl/certs/ca-certificates.crt \
+  "$trusted_certificate" >/dev/null; then
+  printf >&2 'Certificate was installed but is not trusted by the system CA bundle.\n'
+  exit 1
+fi
+
 printf 'Trusted certificate installed at %s\n' "$trusted_certificate"

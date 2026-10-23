@@ -110,6 +110,78 @@ Restart browsers after importing the certificate. Some browsers, including
 Firefox in certain configurations, use their own certificate store; import
 the certificate into that browser's authorities when necessary.
 
+## Remove the certificate
+
+Remove only this certificate and the hosts-file entry. Do not remove other
+certificates from the system trust store.
+
+### Debian or Ubuntu
+
+```sh
+sudo rm -f \
+  /usr/local/share/ca-certificates/kc-admin.mattermost.fysiksektionen.se.crt
+sudo update-ca-certificates
+sudo sed -i '\|^[[:space:]]*127\.0\.0\.1[[:space:]]\+kc-admin\.mattermost\.fysiksektionen\.se[[:space:]]*$|d' \
+  /etc/hosts
+```
+
+### Fedora, RHEL, or CentOS
+
+```sh
+sudo rm -f \
+  /etc/pki/ca-trust/source/anchors/kc-admin.mattermost.fysiksektionen.se.crt
+sudo update-ca-trust
+sudo sed -i '\|^[[:space:]]*127\.0\.0\.1[[:space:]]\+kc-admin\.mattermost\.fysiksektionen\.se[[:space:]]*$|d' \
+  /etc/hosts
+```
+
+### macOS
+
+Remove the certificate from the System keychain using its SHA-1 fingerprint:
+
+```sh
+security find-certificate -a -c kc-admin.mattermost.fysiksektionen.se \
+  /Library/Keychains/System.keychain
+sudo security delete-certificate -c kc-admin.mattermost.fysiksektionen.se \
+  /Library/Keychains/System.keychain
+sudo sed -i '' \
+  '/^[[:space:]]*127\.0\.0\.1[[:space:]]*kc-admin\.mattermost\.fysiksektionen\.se[[:space:]]*$/d' \
+  /etc/hosts
+sudo dscacheutil -flushcache
+sudo killall -HUP mDNSResponder 2>/dev/null || true
+```
+
+If the certificate was installed using **Keychain Access**, delete the
+matching certificate from the **System** keychain there instead.
+
+### Windows
+
+Open **PowerShell as Administrator** and remove the certificate by its
+thumbprint. First inspect matching certificates:
+
+```powershell
+Get-ChildItem Cert:\LocalMachine\Root |
+  Where-Object Subject -Like '*CN=kc-admin.mattermost.fysiksektionen.se*' |
+  Format-List Subject, Thumbprint
+```
+
+After checking the displayed thumbprint, replace `<THUMBPRINT>` and run:
+
+```powershell
+Remove-Item "Cert:\LocalMachine\Root\<THUMBPRINT>"
+```
+
+If it was installed for only the current user, use
+`Cert:\CurrentUser\Root` instead. Remove the hosts-file entry and flush DNS:
+
+```powershell
+$hosts = "$env:SystemRoot\System32\drivers\etc\hosts"
+(Get-Content $hosts) |
+  Where-Object { $_ -notmatch '^\s*127\.0\.0\.1\s+kc-admin\.mattermost\.fysiksektionen\.se\s*$' } |
+  Set-Content $hosts
+ipconfig /flushdns
+```
+
 ## Verify the certificate
 
 Inspect the names before installing it:
