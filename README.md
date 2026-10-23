@@ -27,7 +27,7 @@ the `/admin` and `/metrics` paths on that public listener and uses the
 Let’s Encrypt certificate for `mattermost.fysiksektionen.se`. The local
 administrative URL is `https://localhost:9001/admin/`; nginx redirects it to
 the Keycloak master console at `/admin/master/console/` and uses a separate
-local certificate for `localhost`.
+local certificate for `kc-admin.mattermost.fysiksektionen.se` and `localhost`.
 
 ## Configuration and startup
 
@@ -39,11 +39,14 @@ local certificate for `localhost`.
 2. Generate the local admin certificate:
 
    ```sh
-   ./create-local-certificate.sh
+   ./kc-admin_crt/create-local-certificate.sh
    ```
 
-   To avoid browser warnings, add the generated `tls/fullchain.pem` to the
-   local system's trusted certificates.
+   The generated certificate is in
+   `kc-admin_crt/tls/fullchain.pem` and covers both
+   `kc-admin.mattermost.fysiksektionen.se` and `localhost`. To avoid browser
+   warnings, follow [`kc-admin_crt/install_kc-admin_crt.md`](./kc-admin_crt/install_kc-admin_crt.md)
+   to trust it on each administrative computer.
 3. Ensure the Let’s Encrypt certificate directory contains
    `fullchain.pem` and `privkey.pem` at
    `/etc/letsencrypt/live/mattermost.fysiksektionen.se`.
