@@ -1,6 +1,7 @@
 package se.fysiksektionen.keycloak;
 
 import java.text.Normalizer;
+import java.security.SecureRandom;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -15,7 +16,10 @@ import org.keycloak.models.UserModel;
 
 public final class MattermostUsernameEventListener implements EventListenerProvider {
     private static final String ATTRIBUTE = "mattermostUsername";
+    private static final String ID_ATTRIBUTE = "id";
     private static final int MAX_LENGTH = 22;
+    private static final int ID_NUMBER_BOUND = 100_000_000;
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final KeycloakSession session;
 
@@ -31,12 +35,17 @@ public final class MattermostUsernameEventListener implements EventListenerProvi
 
         RealmModel realm = session.realms().getRealm(event.getRealmId());
         UserModel user = session.users().getUserById(realm, event.getUserId());
-        if (user == null || hasText(user.getFirstAttribute(ATTRIBUTE))) {
+        if (user == null) {
             return;
         }
 
-        String base = baseName(user.getFirstName(), user.getLastName());
-        user.setSingleAttribute(ATTRIBUTE, availableName(realm, base));
+        if (!hasText(user.getFirstAttribute(ATTRIBUTE))) {
+            String base = baseName(user.getFirstName(), user.getLastName());
+            user.setSingleAttribute(ATTRIBUTE, availableName(realm, base));
+        }
+        if (!hasText(user.getFirstAttribute(ID_ATTRIBUTE))) {
+            user.setSingleAttribute(ID_ATTRIBUTE, availableId(realm));
+        }
     }
 
     @Override
@@ -48,6 +57,19 @@ public final class MattermostUsernameEventListener implements EventListenerProvi
             String candidate = fit(base, suffix);
             try (Stream<UserModel> users = session.users()
                     .searchForUserStream(realm, Map.of(ATTRIBUTE, candidate), 0, 1)) {
+                if (users.findAny().isEmpty()) {
+                    return candidate;
+                }
+            }
+        }
+    }
+
+    private String availableId(RealmModel realm) {
+        for (;;) {
+            String candidate = "keycloak" + String.format(Locale.ROOT, "%08d",
+                    RANDOM.nextInt(ID_NUMBER_BOUND));
+            try (Stream<UserModel> users = session.users()
+                    .searchForUserStream(realm, Map.of(ID_ATTRIBUTE, candidate), 0, 1)) {
                 if (users.findAny().isEmpty()) {
                     return candidate;
                 }

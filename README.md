@@ -78,8 +78,10 @@ firstname.lastname2
 
 Names are lowercased, accents are removed, and characters outside
 Mattermost's username character set are removed. Values are limited to
-Mattermost's 22-character username limit. Existing `mattermostUsername`
-values are not changed.
+Mattermost's 22-character username limit. The listener also populates the
+`id` user attribute with a unique value in the form `keycloak########`, where
+the eight digits are randomly generated. Existing `mattermostUsername` and
+`id` values are not changed.
 
 After starting the image, enable the listener for the relevant realm in the
 Keycloak administration console:
