@@ -70,11 +70,12 @@ local certificate for `kc-admin.mattermost.fysiksektionen.se` and `localhost`.
 > ```
 > so changes to it will not automatically be committed.
 
-## Mattermost username provisioning
+## Mattermost user provisioning
 
-The image includes a small Keycloak event listener that provisions the
+The image includes Keycloak event listeners that provision the
 `mattermostUsername` user attribute when the user completes e-mail
-verification. It uses the first available value in this sequence:
+verification and the `id` user attribute when a user is created. The username
+listener uses the first available value in this sequence:
 
 ```text
 firstname.lastname
@@ -84,27 +85,31 @@ firstname.lastname2
 
 Names are lowercased, accents are removed, and characters outside
 Mattermost's username character set are removed. Values are limited to
-Mattermost's 22-character username limit. The listener also populates the
-`id` user attribute with a unique value in the form `keycloak########`, where
-the eight digits are randomly generated. Existing `mattermostUsername` and
-`id` values are not changed.
+Mattermost's 22-character username limit. The user ID listener handles
+registration and administrative user-creation events, and populates the `id`
+user attribute with the first available value in the form
+`keycloak########`, where the eight digits are randomly generated. Existing
+`mattermostUsername` and `id` values are not changed.
 
-After starting the image, enable the listener for the relevant realm in the
+After starting the image, enable both listeners for the relevant realm in the
 Keycloak administration console:
 
 1. Open **Realm settings** → **Events** → **Config**.
-2. Add `mattermost-username` to **Event listeners** and save.
-3. Leave **Events** → **Listeners** configured for user events; the listener
-   only acts on `VERIFY_EMAIL`.
+2. Add `mattermost-username` and `mattermost-user-id` to **Event listeners**
+   and save.
+3. Add `mattermost-user-id` to **Admin event listeners** and save.
+4. Leave **Events** → **Listeners** configured for user events. The username
+   listener acts on `VERIFY_EMAIL`; the user ID listener acts on registration.
+   Administrative user creation is handled through the admin event listener.
+
+Keycloak runs these listeners synchronously in their respective transactions.
+The `mattermostUsername` attribute is written during e-mail verification, and
+the `id` attribute is written during user creation before the transaction is
+committed.
 
 The listener is packaged against the Keycloak version declared in
 [`pom.xml`](./pom.xml). Update that dependency together with the Keycloak
 image when upgrading Keycloak.
-
-Keycloak runs this listener synchronously in the e-mail verification
-transaction. The `mattermostUsername` and `id` attributes are written and the
-transaction is committed before Keycloak redirects the user back to
-Mattermost.
 
 ## Temporary bootstrap administrator
 

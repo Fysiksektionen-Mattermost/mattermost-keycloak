@@ -1,1 +1,2 @@
 se.fysiksektionen.keycloak.MattermostUsernameEventListenerFactory
+se.fysiksektionen.keycloak.MattermostUserIdEventListenerFactory
