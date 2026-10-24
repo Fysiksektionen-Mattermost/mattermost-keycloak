@@ -22,12 +22,12 @@ Rootless Docker deployment of Keycloak with PostgreSQL and an nginx proxy.
 | `9000` | nginx proxy to Keycloak health and metrics management interface | Host loopback only |
 | `9001` | HTTPS admin proxy | Host loopback only |
 
-The user endpoint is `https://mattermost.fysiksektionen.se:8080/`. nginx blocks
+The user endpoint is `https://kc.mattermost.fysiksektionen.se/`. nginx blocks
 the `/admin` and `/metrics` paths on that public listener and uses the
-Let’s Encrypt certificate for `mattermost.fysiksektionen.se`. The local
-administrative URL is `https://localhost:9001/admin/`; nginx redirects it to
+Let’s Encrypt certificate for `kc.mattermost.fysiksektionen.se`. The local
+administrative URL is `https://kc-admin.localhost:9001/admin/`; nginx redirects it to
 the Keycloak master console at `/admin/master/console/` and uses a separate
-local certificate for `kc-admin.mattermost.fysiksektionen.se` and `localhost`.
+local certificate for `kc-admin.localhost` and `localhost`.
 
 ## Configuration and startup
 
@@ -44,12 +44,11 @@ local certificate for `kc-admin.mattermost.fysiksektionen.se` and `localhost`.
 
    The generated certificate is in
    `kc-admin_crt/tls/fullchain.pem` and covers both
-   `kc-admin.mattermost.fysiksektionen.se` and `localhost`. To avoid browser
-   warnings, follow [`kc-admin_crt/install_kc-admin_crt.md`](./kc-admin_crt/install_kc-admin_crt.md)
-   to trust it on each administrative computer.
+   `kc-admin.localhost` and `localhost`. To avoid browser
+   warnings, see [`kc-admin_crt/install_kc-admin_crt.md`](./kc-admin_crt/install_kc-admin_crt.md) to trust it.
 3. Ensure the Let’s Encrypt certificate directory contains
    `fullchain.pem` and `privkey.pem` at
-   `/etc/letsencrypt/live/mattermost.fysiksektionen.se`.
+   `/etc/letsencrypt/live/kc.mattermost.fysiksektionen.se`.
 4. Start the stack:
 
    ```sh

@@ -3,7 +3,7 @@ set -eu
 
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 certificate=${1:-"$script_dir/tls/local-ca.crt"}
-certificate_name=kc-admin.mattermost.fysiksektionen.se.crt
+certificate_name=kc-admin.localhost.crt
 trust_directory=/usr/local/share/ca-certificates
 trusted_certificate="$trust_directory/$certificate_name"
 

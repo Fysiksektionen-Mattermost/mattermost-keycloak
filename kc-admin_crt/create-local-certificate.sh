@@ -17,15 +17,15 @@ openssl req -x509 -nodes -newkey rsa:4096 \
 openssl req -nodes -newkey rsa:2048 \
   -keyout "$tls_dir/privkey.pem" \
   -out "$tls_dir/server.csr" \
-  -subj "/CN=kc-admin.mattermost.fysiksektionen.se" \
-  -addext "subjectAltName=DNS:kc-admin.mattermost.fysiksektionen.se,DNS:localhost,IP:127.0.0.1,IP:::1"
+  -subj "/CN=kc-admin.localhost" \
+  -addext "subjectAltName=DNS:kc-admin.localhost,DNS:localhost,IP:127.0.0.1,IP:::1"
 
 extensions_file="$tls_dir/server-extensions.cnf"
 cat >"$extensions_file" <<'EOF'
 basicConstraints = critical,CA:FALSE
 keyUsage = critical,digitalSignature,keyEncipherment
 extendedKeyUsage = serverAuth
-subjectAltName = DNS:kc-admin.mattermost.fysiksektionen.se,DNS:localhost,IP:127.0.0.1,IP:::1
+subjectAltName = DNS:kc-admin.localhost,DNS:localhost,IP:127.0.0.1,IP:::1
 EOF
 
 openssl x509 -req \
