@@ -15,6 +15,7 @@ ENV KC_METRICS_ENABLED=true
 ENV KC_DB=postgres
 
 WORKDIR /opt/keycloak
+ADD https://github.com/rfyuz/mattermost-theme-keycloakify-editor/releases/download/latest/mattermost-keycloak-theme-from-shadcn.jar /opt/keycloak/providers/
 COPY --from=provider-builder /build/target/mattermost-username-provider-1.0.0.jar /opt/keycloak/providers/
 RUN /opt/keycloak/bin/kc.sh build
 
