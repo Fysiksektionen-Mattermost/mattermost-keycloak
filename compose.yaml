@@ -76,7 +76,8 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./kc-admin_crt/tls:/etc/nginx/tls:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /etc/letsencrypt/live/kc.mattermost.fysiksektionen.se:/etc/letsencrypt/live/kc.mattermost.fysiksektionen.se:ro
+      - /etc/letsencrypt/archive/kc.mattermost.fysiksektionen.se:/etc/letsencrypt/archive/kc.mattermost.fysiksektionen.se:ro
 
 volumes:
   keycloak-postgres-data:
