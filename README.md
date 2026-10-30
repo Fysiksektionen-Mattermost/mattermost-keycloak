@@ -66,8 +66,11 @@ local certificate for `kc-admin.localhost` and `localhost`.
 
 The image includes Keycloak event listeners that provision the
 `mattermostUsername` user attribute when the user completes e-mail
-verification and the `id` user attribute when a user is created. The username
-listener uses the first available value in this sequence:
+verification, the `id` user attribute when a user is created, and send a
+custom introductory e-mail once a user completes their first authentication to
+the Mattermost client.
+
+The username listener uses the first available value in this sequence:
 
 ```text
 firstname.lastname
@@ -83,21 +86,60 @@ user attribute with the first available value in the form
 `keycloak########`, where the eight digits are randomly generated. Existing
 `mattermostUsername` and `id` values are not changed.
 
-After starting the image, enable both listeners for the relevant realm in the
+The introductory e-mail listener (`mattermost-introductory-email`) acts on `LOGIN`
+events for the `mattermost` client in the `mattermost` realm. It checks the custom
+user attribute `introductory-email-sent`. If this attribute is not present (or set
+to `false`), it sends the introductory email using Keycloak's configured SMTP
+server and records `introductory-email-sent = true` on the user profile. If delivery
+fails (e.g. temporary SMTP outage), the error is logged and the attribute is not
+marked as sent so delivery can be retried on subsequent logins without blocking
+user authentication.
+
+After starting the image, enable the listeners for the relevant realm in the
 Keycloak administration console:
 
 1. Open **Realm settings** → **Events** → **Config**.
-2. Add `mattermost-username` and `mattermost-user-id` to **Event listeners**
-   and save.
+2. Add `mattermost-username`, `mattermost-user-id`, and
+   `mattermost-introductory-email` to **Event listeners** and save.
 3. Add `mattermost-user-id` to **Admin event listeners** and save.
 4. Leave **Events** → **Listeners** configured for user events. The username
-   listener acts on `VERIFY_EMAIL`; the user ID listener acts on registration.
+   listener acts on `VERIFY_EMAIL`; the user ID listener acts on registration;
+   the introductory e-mail listener acts on client `LOGIN`.
    Administrative user creation is handled through the admin event listener.
 
 Keycloak runs these listeners synchronously in their respective transactions.
-The `mattermostUsername` attribute is written during e-mail verification, and
+The `mattermostUsername` attribute is written during e-mail verification,
 the `id` attribute is written during user creation before the transaction is
-committed.
+committed, and the introductory email is sent and recorded on first client login.
+
+### Customizing the introductory e-mail
+
+The introductory e-mail comes with default responsive HTML and plain-text templates,
+and can be customized in multiple ways without modifying the code:
+
+1. **Realm attributes** (configured under **Realm settings** → **Attributes** or via the Admin API):
+   - `introductoryEmailSubject`: Custom subject line.
+   - `introductoryEmailBodyHtml`: Custom HTML body.
+   - `introductoryEmailBodyText`: Custom plain-text body.
+2. **Environment variables** (e.g. in `keycloak-secrets.env` or `compose.yaml`):
+   - `MATTERMOST_INTRO_EMAIL_SUBJECT`
+   - `MATTERMOST_INTRO_EMAIL_HTML`
+   - `MATTERMOST_INTRO_EMAIL_TEXT`
+   - `MATTERMOST_INTRO_EMAIL_HTML_FILE`: Path to a mounted HTML template file.
+   - `MATTERMOST_INTRO_EMAIL_TEXT_FILE`: Path to a mounted plain-text template file.
+3. **Template placeholders**:
+   The templates support dynamic placeholders in `{placeholder}` or `${placeholder}` format:
+   - `{firstName}`: Recipient's first name (falls back to "there").
+   - `{lastName}`: Recipient's last name.
+   - `{fullName}`: Recipient's full name.
+   - `{username}`: Keycloak username.
+   - `{mattermostUsername}`: Provisioned Mattermost username.
+   - `{email}`: Recipient's e-mail address.
+   - `{realm}`: Realm name (`mattermost`).
+   - `{clientId}`: Client ID (`mattermost`).
+
+To manually resend the introductory e-mail to an individual user, remove or set
+their `introductory-email-sent` attribute to `false` in the Admin Console.
 
 The listener is packaged against the Keycloak version declared in
 [`pom.xml`](./pom.xml). Update that dependency together with the Keycloak
@@ -110,7 +152,7 @@ Keycloak reads `KC_BOOTSTRAP_ADMIN_USERNAME` and
 an empty database. These credentials are used to create the initial
 administrator and are not a replacement for normal user management.
 
-After logging in through `https://localhost:9001`:
+After logging in through `https://kc-admin.localhost:9001`:
 
 1. Create a permanent administrator with the required minimum privileges.
 2. Verify that the permanent account works.
