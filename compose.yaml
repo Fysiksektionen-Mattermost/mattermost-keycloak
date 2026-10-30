@@ -68,7 +68,7 @@ services:
       - /var/cache/nginx:mode=1777
       - /var/run:mode=1777
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080" # is forwarded locally by system-wide nginx
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"
     networks:
