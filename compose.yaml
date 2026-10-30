@@ -30,8 +30,8 @@ services:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
       KC_DB_USERNAME: keycloak
-      KC_HOSTNAME: https://kc.mattermost.fysiksektionen.se
-      KC_HOSTNAME_ADMIN: https://kc-admin.localhost:9001
+      KC_HOSTNAME: kc.mattermost.fysiksektionen.se
+      KC_HOSTNAME_ADMIN: kc-admin.localhost
       KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
       KC_HTTP_ENABLED: "true"
       KC_HTTP_MANAGEMENT_PORT: "9000"
