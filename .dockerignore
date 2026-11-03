@@ -1,0 +1,14 @@
+.git
+.github
+
+target
+
+keycloak-secrets.env
+*.pem
+*.key
+*.crt
+
+compose.yaml
+nginx*.conf
+README.md
+to-do.md
