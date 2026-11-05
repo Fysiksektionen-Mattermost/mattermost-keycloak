@@ -114,29 +114,28 @@ committed, and the introductory email is sent and recorded on first client login
 
 ### Customizing the introductory e-mail
 
-The introductory e-mail comes with default responsive HTML and plain-text templates,
-and can be customized in multiple ways without modifying the code:
+The introductory e-mail has built-in responsive HTML and plain-text defaults. To
+customize it, use **Realm settings** → **Localization** in the admin console and
+add overrides for the desired locale using these message keys:
 
-1. **Realm attributes** (configured under **Realm settings** → **Attributes** or via the Admin API):
-   - `introductoryEmailSubject`: Custom subject line.
-   - `introductoryEmailBodyHtml`: Custom HTML body.
-   - `introductoryEmailBodyText`: Custom plain-text body.
-2. **Environment variables** (e.g. in `keycloak-secrets.env` or `compose.yaml`):
-   - `MATTERMOST_INTRO_EMAIL_SUBJECT`
-   - `MATTERMOST_INTRO_EMAIL_HTML`
-   - `MATTERMOST_INTRO_EMAIL_TEXT`
-   - `MATTERMOST_INTRO_EMAIL_HTML_FILE`: Path to a mounted HTML template file.
-   - `MATTERMOST_INTRO_EMAIL_TEXT_FILE`: Path to a mounted plain-text template file.
-3. **Template placeholders**:
-   The templates support dynamic placeholders in `{placeholder}` or `${placeholder}` format:
-   - `{firstName}`: Recipient's first name (falls back to "there").
-   - `{lastName}`: Recipient's last name.
-   - `{fullName}`: Recipient's full name.
-   - `{username}`: Keycloak username.
-   - `{mattermostUsername}`: Provisioned Mattermost username.
-   - `{email}`: Recipient's e-mail address.
-   - `{realm}`: Realm name (`mattermost`).
-   - `{clientId}`: Client ID (`mattermost`).
+- `mattermostIntroductoryEmailSubject`
+- `mattermostIntroductoryEmailText`
+- `mattermostIntroductoryEmailHtml`
+
+The subject and bodies support dynamic placeholders in `{placeholder}` or
+`${placeholder}` format:
+
+- `{firstName}`: Recipient's first name (falls back to "there").
+- `{lastName}`: Recipient's last name.
+- `{fullName}`: Recipient's full name.
+- `{username}`: Keycloak username.
+- `{mattermostUsername}`: Provisioned Mattermost username.
+- `{email}`: Recipient's e-mail address.
+- `{realm}`: Realm name (`mattermost`).
+- `{clientId}`: Client ID (`mattermost`).
+
+The user's locale is used when available; otherwise the realm's default locale
+is used. If no override exists, the built-in template is used.
 
 To manually resend the introductory e-mail to an individual user, remove or set
 their `introductory-email-sent` attribute to `false` in the Admin Console.

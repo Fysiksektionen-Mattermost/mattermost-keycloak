@@ -1,8 +1,5 @@
 package se.fysiksektionen.keycloak;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +21,10 @@ public final class MattermostIntroductoryEmailEventListener implements EventList
     public static final String DEFAULT_CLIENT_ID = "mattermost";
     public static final String DEFAULT_ATTRIBUTE_SENT = "introductory-email-sent";
 
-    private static final String DEFAULT_SUBJECT = "Welcome to Mattermost";
+    private static final String SUBJECT_KEY = "mattermostIntroductoryEmailSubject";
+    private static final String TEXT_BODY_KEY = "mattermostIntroductoryEmailText";
+    private static final String HTML_BODY_KEY = "mattermostIntroductoryEmailHtml";
+    private static final String DEFAULT_SUBJECT = "Welcome to Mattermost!";
 
     private static final String DEFAULT_TEXT_BODY = """
             Hi {firstName},
@@ -32,13 +32,20 @@ public final class MattermostIntroductoryEmailEventListener implements EventList
             Welcome to Mattermost! You have completed your first login.
 
             Your account details:
-            - Username: {mattermostUsername}
             - Email: {email}
+            - Your password can be updated by clicking on "Forgot password?" on the login page.
 
             You can access Mattermost anytime at:
-            https://mattermost.fysiksektionen.se/
+            https://mattermost.fysiksektionen.se/ > "International Student"
 
-            If you have any questions or need assistance, feel free to reach out to the system administrators.
+            We highly recommend that you install the mobile app to easier keep up with the goings-on at Mattermost.
+            It is available on Apple App Store and Google Play, search for "Mattermost".
+            To log in to the app, type in
+            - Server URL: https://mattermost.fysiksektionen.se/
+            - Display Name: Fysiksektionen
+            - ... and choose to log in as an International Student.
+
+            If you have any questions or need assistance, feel free to reach out to the system administrators at mattermaster@f.kth.se.
 
             Best regards,
             Fysiksektionen
@@ -95,20 +102,6 @@ public final class MattermostIntroductoryEmailEventListener implements EventList
                   margin: 4px 0;
                   font-size: 14px;
                 }
-                .btn-container {
-                  text-align: center;
-                  margin: 32px 0 16px 0;
-                }
-                .btn {
-                  display: inline-block;
-                  background-color: #1e3a8a;
-                  color: #ffffff !important;
-                  text-decoration: none;
-                  font-weight: 600;
-                  font-size: 15px;
-                  padding: 12px 28px;
-                  border-radius: 6px;
-                }
                 .footer {
                   background-color: #f8fafc;
                   border-top: 1px solid #e2e8f0;
@@ -126,18 +119,33 @@ public final class MattermostIntroductoryEmailEventListener implements EventList
                 </div>
                 <div class="content">
                   <p>Hi {firstName},</p>
-                  <p>Welcome to <strong>Mattermost</strong>! You have successfully completed your first login.</p>
+                  <p>Welcome to <strong>Mattermost</strong>! You have completed your first login.</p>
                   <div class="info-box">
-                    <p><strong>Username:</strong> {mattermostUsername}</p>
                     <p><strong>Email:</strong> {email}</p>
+                    <p>Your password can be updated by clicking on
+                      <strong>&quot;Forgot password?&quot;</strong> on the login page.</p>
                   </div>
-                  <p>You can now join channels, collaborate with team members, and stay up to date with announcements.</p>
-                  <div class="btn-container">
-                    <a href="https://mattermost.fysiksektionen.se/" class="btn">Open Mattermost</a>
-                  </div>
+                  <p>You can access Mattermost anytime at
+                    <a href="https://mattermost.fysiksektionen.se/">https://mattermost.fysiksektionen.se/</a>
+                    &gt; <strong>&quot;International Student&quot;</strong>.</p>
+                  <p>We highly recommend installing the mobile app to make it easier
+                    to keep up with what is happening in Mattermost. It is available
+                    on the Apple App Store and Google Play; search for
+                    <strong>&quot;Mattermost&quot;</strong>.</p>
+                  <p>To log in to the app, enter:</p>
+                  <ul>
+                    <li><strong>Server URL:</strong>
+                      <a href="https://mattermost.fysiksektionen.se/">
+                        https://mattermost.fysiksektionen.se/</a></li>
+                    <li><strong>Display Name:</strong> Fysiksektionen</li>
+                    <li>Choose to log in as an <strong>International Student</strong>.</li>
+                  </ul>
+                  <p>If you have any questions or need assistance, contact the system
+                    administrators at <a href="mailto:mattermaster@f.kth.se">
+                    mattermaster@f.kth.se</a>.</p>
                 </div>
                 <div class="footer">
-                  <p style="margin: 0;">This email was sent automatically by Fysiksektionen Keycloak.</p>
+                  <p style="margin: 0;">Best regards,<br>Fysiksektionen</p>
                 </div>
               </div>
             </body>
@@ -156,7 +164,7 @@ public final class MattermostIntroductoryEmailEventListener implements EventList
             return;
         }
 
-        String targetClientId = getTargetClientId();
+        String targetClientId = DEFAULT_CLIENT_ID;
         if (!targetClientId.equals(event.getClientId())) {
             return;
         }
@@ -170,8 +178,7 @@ public final class MattermostIntroductoryEmailEventListener implements EventList
             return;
         }
 
-        String targetRealm = getTargetRealm();
-        if (!targetRealm.equalsIgnoreCase(realm.getName())) {
+        if (!DEFAULT_REALM.equalsIgnoreCase(realm.getName())) {
             return;
         }
 
@@ -180,7 +187,7 @@ public final class MattermostIntroductoryEmailEventListener implements EventList
             return;
         }
 
-        String attributeName = getAttributeName();
+        String attributeName = DEFAULT_ATTRIBUTE_SENT;
         if (isAlreadySent(user, attributeName)) {
             return;
         }
@@ -211,9 +218,10 @@ public final class MattermostIntroductoryEmailEventListener implements EventList
         }
 
         Map<String, String> replacements = buildReplacements(realm, user, clientId);
-        String subject = resolveTemplate(getSubject(realm), replacements);
-        String textBody = resolveTemplate(getTextBody(realm), replacements);
-        String htmlBody = resolveTemplate(getHtmlBody(realm), replacements);
+        Map<String, String> localization = getLocalization(realm, user);
+        String subject = resolveTemplate(localization.getOrDefault(SUBJECT_KEY, DEFAULT_SUBJECT), replacements);
+        String textBody = resolveTemplate(localization.getOrDefault(TEXT_BODY_KEY, DEFAULT_TEXT_BODY), replacements);
+        String htmlBody = resolveTemplate(localization.getOrDefault(HTML_BODY_KEY, DEFAULT_HTML_BODY), replacements);
 
         try {
             emailSender.send(smtpConfig, user, subject, textBody, htmlBody);
@@ -222,9 +230,6 @@ public final class MattermostIntroductoryEmailEventListener implements EventList
                     user.getUsername(), user.getEmail(), clientId);
         } catch (EmailException e) {
             logger.errorf(e, "Failed to send introductory email to user %s (%s) for client %s.",
-                    user.getUsername(), user.getEmail(), clientId);
-        } catch (Exception e) {
-            logger.errorf(e, "Unexpected error occurred while sending introductory email to user %s (%s) for client %s.",
                     user.getUsername(), user.getEmail(), clientId);
         }
     }
@@ -270,78 +275,12 @@ public final class MattermostIntroductoryEmailEventListener implements EventList
         return result;
     }
 
-    private String getSubject(RealmModel realm) {
-        String realmAttr = realm.getAttribute("introductoryEmailSubject");
-        if (hasText(realmAttr)) {
-            return realmAttr;
+    private static Map<String, String> getLocalization(RealmModel realm, UserModel user) {
+        String locale = user.getFirstAttribute(UserModel.LOCALE);
+        if (!hasText(locale)) {
+            locale = realm.getDefaultLocale();
         }
-        String env = System.getenv("MATTERMOST_INTRO_EMAIL_SUBJECT");
-        if (hasText(env)) {
-            return env;
-        }
-        return DEFAULT_SUBJECT;
-    }
-
-    private String getTextBody(RealmModel realm) {
-        String realmAttr = realm.getAttribute("introductoryEmailBodyText");
-        if (hasText(realmAttr)) {
-            return realmAttr;
-        }
-        String envFile = System.getenv("MATTERMOST_INTRO_EMAIL_TEXT_FILE");
-        if (hasText(envFile)) {
-            String fromFile = readFile(envFile);
-            if (hasText(fromFile)) {
-                return fromFile;
-            }
-        }
-        String env = System.getenv("MATTERMOST_INTRO_EMAIL_TEXT");
-        if (hasText(env)) {
-            return env;
-        }
-        return DEFAULT_TEXT_BODY;
-    }
-
-    private String getHtmlBody(RealmModel realm) {
-        String realmAttr = realm.getAttribute("introductoryEmailBodyHtml");
-        if (hasText(realmAttr)) {
-            return realmAttr;
-        }
-        String envFile = System.getenv("MATTERMOST_INTRO_EMAIL_HTML_FILE");
-        if (hasText(envFile)) {
-            String fromFile = readFile(envFile);
-            if (hasText(fromFile)) {
-                return fromFile;
-            }
-        }
-        String env = System.getenv("MATTERMOST_INTRO_EMAIL_HTML");
-        if (hasText(env)) {
-            return env;
-        }
-        return DEFAULT_HTML_BODY;
-    }
-
-    private static String readFile(String path) {
-        try {
-            return Files.readString(Path.of(path));
-        } catch (IOException e) {
-            logger.warnf("Could not read introductory email template from file %s: %s", path, e.getMessage());
-            return null;
-        }
-    }
-
-    private static String getTargetRealm() {
-        String env = System.getenv("MATTERMOST_REALM");
-        return hasText(env) ? env : DEFAULT_REALM;
-    }
-
-    private static String getTargetClientId() {
-        String env = System.getenv("MATTERMOST_CLIENT_ID");
-        return hasText(env) ? env : DEFAULT_CLIENT_ID;
-    }
-
-    private static String getAttributeName() {
-        String env = System.getenv("MATTERMOST_INTRO_EMAIL_SENT_ATTR");
-        return hasText(env) ? env : DEFAULT_ATTRIBUTE_SENT;
+        return hasText(locale) ? realm.getRealmLocalizationTextsByLocale(locale) : Map.of();
     }
 
     private static boolean hasText(String value) {
@@ -360,4 +299,3 @@ public final class MattermostIntroductoryEmailEventListener implements EventList
     public void close() {
     }
 }
-
