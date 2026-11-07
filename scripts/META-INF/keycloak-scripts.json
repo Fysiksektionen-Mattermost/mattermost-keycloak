@@ -1,0 +1,11 @@
+{
+    "authenticators": [],
+    "policies": [],
+    "mappers": [
+        {
+            "name": "Mattermost Email Mapper",
+            "fileName": "mattermost-email-mapper.js",
+            "description": "Maps mattermostEmail if present, otherwise uses default email"
+        }
+    ]
+}

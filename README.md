@@ -150,9 +150,11 @@ image when upgrading Keycloak.
 ### Mattermost e-mail mapper
 
 The [`scripts/mattermost-email-mapper.js`](./scripts/mattermost-email-mapper.js)
-Script Mapper forwards the `mattermostEmail` user attribute when it contains a
-value; otherwise, it forwards the user's standard `email` attribute. Configure
-the mapper with:
+Script Mapper is packaged with
+[`META-INF/keycloak-scripts.json`](./scripts/META-INF/keycloak-scripts.json)
+into `conditional-mapper.jar` and installed as a Keycloak provider. It forwards
+the `mattermostEmail` user attribute when it contains a value; otherwise, it
+forwards the user's standard `email` attribute. Configure the mapper with:
 
 - **Mapper Type:** `Script Mapper`
 - **Script:** contents of `scripts/mattermost-email-mapper.js`
