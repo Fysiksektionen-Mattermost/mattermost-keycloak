@@ -37,7 +37,7 @@ services:
       KC_HTTP_ENABLED: "true"
       KC_HTTP_MANAGEMENT_PORT: "9000"
       KC_PROXY_HEADERS: xforwarded
-      KC_FEATURES: preview
+      KC_FEATURES: scripts
     env_file:
       - ./keycloak-secrets.env
     networks:
