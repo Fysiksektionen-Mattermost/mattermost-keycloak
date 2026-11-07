@@ -1,7 +1,8 @@
 {
     "authenticators": [],
     "policies": [],
-    "mappers": [
+    "mappers": [],
+    "saml-mappers": [
         {
             "name": "Mattermost Email Mapper",
             "fileName": "mattermost-email-mapper.js",
