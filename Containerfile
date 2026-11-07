@@ -17,7 +17,7 @@ ENV KC_DB=postgres
 WORKDIR /opt/keycloak
 ADD --chmod=644 https://github.com/rfyuz/mattermost-keycloakify-theme/releases/download/latest/mattermost-keycloak-login-theme-from-shadcn.jar /opt/keycloak/providers/
 # Unused: ADD --chmod=644 https://github.com/rfyuz/mattermost-keycloakify-theme/releases/download/latest/mattermost-keycloak-email-theme.jar /opt/keycloak/providers/
-COPY --from=provider-builder /build/target/mattermost-username-provider-1.0.0.jar /opt/keycloak/providers/
+COPY --from=provider-builder /build/target/mattermost-username-id-introemail-providers-1.0.0.jar /opt/keycloak/providers/
 RUN /opt/keycloak/bin/kc.sh build
 
 FROM quay.io/keycloak/keycloak:latest@sha256:79c623a22abacf3fe6c00a5fb30f5b7843d717b234033b80995891c06116d244

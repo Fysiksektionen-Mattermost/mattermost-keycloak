@@ -36,7 +36,7 @@ public final class MattermostIntroductoryEmailEventListener implements EventList
             - Your password can be updated by clicking on "Forgot password?" on the login page.
 
             You can access Mattermost anytime at:
-            https://mattermost.fysiksektionen.se/ > "International Student"
+            https://mattermost.fysiksektionen.se/, click on "International Student"
 
             We highly recommend that you install the mobile app to easier keep up with the goings-on at Mattermost.
             It is available on Apple App Store and Google Play, search for "Mattermost".
@@ -126,8 +126,7 @@ public final class MattermostIntroductoryEmailEventListener implements EventList
                       <strong>&quot;Forgot password?&quot;</strong> on the login page.</p>
                   </div>
                   <p>You can access Mattermost anytime at
-                    <a href="https://mattermost.fysiksektionen.se/">https://mattermost.fysiksektionen.se/</a>
-                    &gt; <strong>&quot;International Student&quot;</strong>.</p>
+                    <a href="https://mattermost.fysiksektionen.se/">https://mattermost.fysiksektionen.se/</a>, click on <strong>&quot;International Student&quot;</strong>.</p>
                   <p>We highly recommend installing the mobile app to make it easier
                     to keep up with what is happening in Mattermost. It is available
                     on the Apple App Store and Google Play; search for

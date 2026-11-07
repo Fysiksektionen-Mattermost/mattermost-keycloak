@@ -1,5 +1,3 @@
-Note: This repository was heavily written by AI, specifically GPT-5.6 Luna.
-
 # Mattermost Keycloak
 
 Rootless Docker deployment of Keycloak with PostgreSQL and an nginx proxy.
@@ -9,7 +7,7 @@ Rootless Docker deployment of Keycloak with PostgreSQL and an nginx proxy.
 - **Keycloak** runs from the custom `Containerfile`.
 - **PostgreSQL** stores Keycloak state on the named
   `keycloak-postgres-data` volume. PostgreSQL has no published host port.
-- **nginx** runs on the Compose network and proxies public user traffic and
+- **nginx** runs on the Compose network and proxies user traffic and
   local administrative traffic to Keycloak over the internal `keycloak`
   service name.
 - All services use the `keycloak` bridge network.
@@ -18,7 +16,7 @@ Rootless Docker deployment of Keycloak with PostgreSQL and an nginx proxy.
 
 | Port | Purpose | Exposure |
 | --- | --- | --- |
-| `8080` | HTTPS Keycloak user/application endpoint | Public |
+| `8080` | HTTPS Keycloak user/application endpoint | Host loopback only (made public via redirect from system-wide nginx) |
 | `9000` | nginx proxy to Keycloak health and metrics management interface | Host loopback only |
 | `9001` | HTTPS admin proxy | Host loopback only |
 
@@ -28,6 +26,19 @@ Let’s Encrypt certificate for `kc.mattermost.fysiksektionen.se`. The local
 administrative URL is `https://kc-admin.localhost:9001/admin/`; nginx redirects it to
 the Keycloak master console at `/admin/master/console/` and uses a separate
 local certificate for `kc-admin.localhost` and `localhost`.
+
+## Interact with the admin interface
+
+1.  Tunnel port 9001 to the server if it is not running locally
+```
+ssl -N -L 9001:127.0.0.1:9001 SSL_SERVER_NAME
+```
+2. Map the domain `kc-admin.localhost` to localhost by adding the following line to /etc/hosts or similar
+```
+127.0.0.1   kc-admin.localhost
+```
+3. Import [./kc-admin_crt/tls/local-ca.crt](./kc-admin_crt/tls/local-ca.crt) to your browser's certificate store. See [./kc-admin_crt/install_kc-admin_crt.md](./kc-admin_crt/install_kc-admin_crt.md) for more ways to do this.
+4. Open [https://kc-admin.localhost:9001](https://kc-admin.localhost:9001) in your browser.
 
 ## Configuration and startup
 
@@ -44,12 +55,8 @@ local certificate for `kc-admin.localhost` and `localhost`.
 
    The generated certificate is in
    `kc-admin_crt/tls/fullchain.pem` and covers both
-   `kc-admin.localhost` and `localhost`. To avoid browser
-   warnings, see [`kc-admin_crt/install_kc-admin_crt.md`](./kc-admin_crt/install_kc-admin_crt.md) to trust it.
-3. Ensure the Let’s Encrypt certificate directory contains
-   `fullchain.pem` and `privkey.pem` at
-   `/etc/letsencrypt/live/kc.mattermost.fysiksektionen.se`.
-4. Start the stack:
+   `kc-admin.localhost` and `localhost`.
+3. Start the stack:
 
    ```sh
    docker compose up -d --build
@@ -59,7 +66,7 @@ local certificate for `kc-admin.localhost` and `localhost`.
 
    ```sh
    docker compose ps
-   docker compose logs --tail=100 keycloak nginx
+   docker compose logs --tail=100
    ```
 
 ## Mattermost user provisioning
@@ -122,6 +129,8 @@ add overrides for the desired locale using these message keys:
 - `mattermostIntroductoryEmailText`
 - `mattermostIntroductoryEmailHtml`
 
+If no override exists, the built-in template is used.
+
 The subject and bodies support dynamic placeholders in `{placeholder}` or
 `${placeholder}` format:
 
@@ -133,12 +142,6 @@ The subject and bodies support dynamic placeholders in `{placeholder}` or
 - `{email}`: Recipient's e-mail address.
 - `{realm}`: Realm name (`mattermost`).
 - `{clientId}`: Client ID (`mattermost`).
-
-The user's locale is used when available; otherwise the realm's default locale
-is used. If no override exists, the built-in template is used.
-
-To manually resend the introductory e-mail to an individual user, remove or set
-their `introductory-email-sent` attribute to `false` in the Admin Console.
 
 The listener is packaged against the Keycloak version declared in
 [`pom.xml`](./pom.xml). Update that dependency together with the Keycloak
@@ -162,16 +165,14 @@ After logging in through `https://kc-admin.localhost:9001`:
 The bootstrap credentials do not reset an existing Keycloak database, and
 changing or removing them does not delete an already-created account.
 
-## Executive security decisions
+## Security decisions
 
 - **Separated endpoint exposure:** the user endpoint is published on port
   `8080`, while ports `9000` and `9001` are bound to host loopback. nginx
   blocks the administrative `/admin` and `/metrics` paths on the public
   listener.
-- **Encrypted traffic:** nginx requires TLS 1.2 or newer and sends HSTS on
-  both the public user endpoint and the local admin endpoint. The public
-  Let’s Encrypt certificate and local admin certificate are mounted at
-  runtime rather than embedded in an image.
+- **Encrypted traffic:** nginx requires TLS 1.2 or newer and sends HSTS on both
+  the public user endpoint (system-wide) and the local admin endpoint. The local admin certificate is mounted at runtime rather than embedded in an image. A local certificate with a domain name ending in `.localhost` was chosen by recommendation of https://letsencrypt.org/docs/certificates-for-localhost/.
 - **Trusted proxy handling:** Keycloak uses forwarded headers and nginx passes
   the original host including its non-default port, protocol, client address,
   and forwarding chain.
@@ -200,16 +201,5 @@ changing or removing them does not delete an already-created account.
   monitoring. Monitoring access should be limited to trusted local processes.
 - Image digest updates must be reviewed and tested before changing the pinned
   values.
-
-## Validation
-
-The current configuration has been validated with:
-
-```sh
-docker compose config
-docker build --file Containerfile .
-docker run ... nginx:1.27-alpine nginx -t
-```
-
-The nginx check requires certificate files to be mounted into the validation
-container.
+- There is no internal backup and restore procedure for the PostgreSQL volume
+  or the realm configuration, consider adding this.
