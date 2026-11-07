@@ -147,6 +147,21 @@ The listener is packaged against the Keycloak version declared in
 [`pom.xml`](./pom.xml). Update that dependency together with the Keycloak
 image when upgrading Keycloak.
 
+### Mattermost e-mail mapper
+
+The [`scripts/mattermost-email-mapper.js`](./scripts/mattermost-email-mapper.js)
+Script Mapper forwards the `mattermostEmail` user attribute when it contains a
+value; otherwise, it forwards the user's standard `email` attribute. Configure
+the mapper with:
+
+- **Mapper Type:** `Script Mapper`
+- **Script:** contents of `scripts/mattermost-email-mapper.js`
+- **Token Claim Name:** `email`
+- **Claim JSON Type:** `String`
+- **Add to ID token:** enabled
+- **Add to access token:** enabled
+- **Add to userinfo:** enabled
+
 ## Temporary bootstrap administrator
 
 Keycloak reads `KC_BOOTSTRAP_ADMIN_USERNAME` and
