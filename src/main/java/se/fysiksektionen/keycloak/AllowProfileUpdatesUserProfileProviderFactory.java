@@ -6,7 +6,7 @@ import org.keycloak.models.KeycloakSession;
 
 public final class AllowProfileUpdatesUserProfileProviderFactory
         extends DeclarativeUserProfileProviderFactory {
-    public static final String ID = "allow-profile-updates";
+    public static final String ID = DeclarativeUserProfileProviderFactory.ID;
 
     @Override
     public String getId() {
