@@ -37,6 +37,7 @@ the client machine, for example:
 
 1. Resolve kc-admin.localhost as localhost.
 2. Import local-ca.crt to the browser manually.
+* **NOTE:** prod_admin_crt contains the crt for the production server.
 
 # Other ways of importing the certificate.
 

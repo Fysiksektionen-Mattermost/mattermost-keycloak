@@ -1,5 +1,10 @@
+*
+**/*
+!.gitignore
+
 privkey.pem
 local-ca-key.pem
+local-ca.crt
 local-ca.srl
 server.csr
 server-extensions.cnf
