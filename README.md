@@ -119,6 +119,18 @@ The `mattermostUsername` attribute is written during e-mail verification,
 the `id` attribute is written during user creation before the transaction is
 committed, and the introductory email is sent and recorded on first client login.
 
+### Locked profile names
+
+The `allow-profile-updates` user profile provider makes the `firstName` and
+`lastName` attributes read-only in regular user contexts when the user has
+`allowProfileUpdates = true`. Administrators can still edit both attributes through
+the admin console and API.
+
+After starting the image, select `allow-profile-updates` as the realm's user
+profile provider in **Realm settings** → **User profile**. Users without the
+`allowProfileUpdates` attribute or with it set to any value other than `true`
+retain normal first-name and last-name editing behavior.
+
 ### Customizing the introductory e-mail
 
 The introductory e-mail has built-in responsive HTML and plain-text defaults. To

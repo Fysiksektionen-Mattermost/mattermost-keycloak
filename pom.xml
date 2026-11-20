@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>se.fysiksektionen</groupId>
-  <artifactId>mattermost-username-id-introemail-providers</artifactId>
+  <artifactId>mattermost-username-id-introemail-allowprofileupdates-providers</artifactId>
   <version>1.0.0</version>
 
   <properties>
@@ -30,6 +30,12 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-core</artifactId>
+      <version>${keycloak.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-services</artifactId>
       <version>${keycloak.version}</version>
       <scope>provided</scope>
     </dependency>
