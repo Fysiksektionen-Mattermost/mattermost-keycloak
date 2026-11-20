@@ -16,8 +16,8 @@ ENV KC_METRICS_ENABLED=true
 ENV KC_DB=postgres
 
 WORKDIR /opt/keycloak
-ADD --chown=keycloak:keycloak https://github.com/rfyuz/mattermost-keycloakify-theme/releases/download/latest/mattermost-keycloak-login-theme-from-shadcn.jar /opt/keycloak/providers/
-# Unused: ADD --chown=keycloak:keycloak https://github.com/rfyuz/mattermost-keycloakify-theme/releases/download/latest/mattermost-keycloak-email-theme.jar /opt/keycloak/providers/
+ADD --chown=keycloak:keycloak https://github.com/Fysiksektionen-Mattermost/mattermost-keycloakify-theme/releases/download/latest/mattermost-keycloak-login-theme-from-shadcn.jar /opt/keycloak/providers/
+# Unused: ADD --chown=keycloak:keycloak https://github.com/Fysiksektionen-Mattermost/mattermost-keycloakify-theme/releases/download/latest/mattermost-keycloak-email-theme.jar /opt/keycloak/providers/
 COPY --from=provider-builder /build/target/mattermost-username-id-introemail-allowprofileupdates-providers-1.0.0.jar /opt/keycloak/providers/
 COPY --from=provider-builder /build/target/mattermost-email-mapper.jar /opt/keycloak/providers/
 ADD --chown=keycloak:keycloak --checksum=sha256:190752f2db820174013466deb728dadd3bb2e260bc4126dbeb5973604c0ba267 https://repo1.maven.org/maven2/fr/cnieg/keycloak/attribute-login-provider/1.11.37/attribute-login-provider-1.11.37.jar /opt/keycloak/providers/attribute-login-provider-1.11.37.jar
