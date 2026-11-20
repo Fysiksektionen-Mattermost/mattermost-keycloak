@@ -1,0 +1,17 @@
+services:
+  keycloak:
+    environment:
+      KC_HOSTNAME: https://kc-admin.localhost:9001
+      KC_HOSTNAME_ADMIN: https://kc-admin.localhost:9001
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+    command: ["start-dev", "--import-realm"]
+    volumes:
+      - ./realm-export:/opt/keycloak/data/import:ro
+
+  nginx:
+    ports: !override
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      - ./kc-admin_crt/tls:/etc/nginx/tls:ro

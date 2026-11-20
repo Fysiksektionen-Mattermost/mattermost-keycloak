@@ -69,6 +69,26 @@ ssl -N -L 9001:127.0.0.1:9001 SSL_SERVER_NAME
    docker compose logs --tail=100
    ```
 
+## Local development
+
+Use the development Compose override for a local-only Keycloak that runs in
+development mode and uses `kc-admin.localhost` instead of the production
+Mattermost hostname:
+
+```sh
+./kc-admin_crt/create-local-certificate.sh
+docker compose -f compose.yaml -f compose.dev.yaml up -d --build
+```
+
+Add `127.0.0.1 kc-admin.localhost` to the hosts file if it is not already
+resolved, trust the local CA in `kc-admin_crt/tls/local-ca.crt`, and open
+`https://kc-admin.localhost:9001/admin/`.
+
+To import realm configuration at startup, place one or more Keycloak realm
+export JSON files in `realm-export/`. The directory is mounted read-only at
+`/opt/keycloak/data/import`, and `--import-realm` imports it when Keycloak
+starts. JSON realm exports are ignored by Git.
+
 ## Mattermost user provisioning
 
 The image includes Keycloak event listeners that provision the
