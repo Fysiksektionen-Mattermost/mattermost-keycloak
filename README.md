@@ -108,10 +108,10 @@ firstname.lastname2
 Names are lowercased, accents are removed, and characters outside
 Mattermost's username character set are removed. Values are limited to
 Mattermost's 22-character username limit. The user ID listener handles
-registration and administrative user-creation events, and populates the `id`
+registration and administrative user-creation events, and populates the `mattermostID`
 user attribute with the first available value in the form
 `keycloak########`, where the eight digits are randomly generated. Existing
-`mattermostUsername` and `id` values are not changed.
+`mattermostUsername` and `mattermostID` values are not changed.
 
 The introductory e-mail listener (`mattermost-introductory-email`) acts on `LOGIN`
 events for the `mattermost` client in the `mattermost` realm. It checks the custom

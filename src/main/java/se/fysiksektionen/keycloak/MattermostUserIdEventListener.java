@@ -16,7 +16,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 
 public final class MattermostUserIdEventListener implements EventListenerProvider {
-    private static final String ID_ATTRIBUTE = "id";
+    private static final String ID_ATTRIBUTE = "mattermostID";
     private static final int ID_NUMBER_BOUND = 100_000_000;
     private static final SecureRandom RANDOM = new SecureRandom();
 
